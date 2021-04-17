@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>						
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="styles.css" rel="stylesheet" type="text/css">
+	
+	<script type="text/javascript">
+		var settings = {};
+	
+		function onLoad(){
+			var xobj = new XMLHttpRequest();
+			xobj.overrideMimeType("application/json");
+			xobj.open('GET', '../settings.json', true);
+			xobj.onreadystatechange = function () {
+				if (xobj.readyState == 4 && xobj.status == "200") {
+					settings = JSON.parse(xobj.responseText);
+					var keyNames = Object.keys(settings);
+					keyNames.forEach(function(key) {
+						console.log("found " + key);
+						document.getElementById(key).value = settings[key];
+					});
+					
+					document.getElementById("MQTT_clientEnabled").checked = document.getElementById("MQTT_clientEnabled").value == "true";
+					document.getElementById("WIFI_clientEnabled").checked = document.getElementById("WIFI_clientEnabled").value == "true";
+					document.getElementById("mqttSett").style.display = document.getElementById("MQTT_clientEnabled").checked ? "block" : "none";
+					document.getElementById("wifiSett").style.display = document.getElementById("WIFI_clientEnabled").checked ? "block" : "none";
+				}
+			};
+			xobj.send(null);  
+		}
+		
+		function hideUnHideMQTT() {
+			document.getElementById("mqttSett").style.display = document.getElementById("MQTT_clientEnabled").checked ? "block" : "none";
+			settings.MQTT_clientEnabled = document.getElementById('MQTT_clientEnabled').checked;
+		}
+		
+		function hideUnHideWIFI() {
+			document.getElementById("wifiSett").style.display = document.getElementById("WIFI_clientEnabled").checked ? "block" : "none";
+			settings.WIFI_clientEnabled = document.getElementById('WIFI_clientEnabled').checked;
+		}
+		
+		function save(){
+			if(settings.WIFICHANGED) alert("changed wifi settings detected! Networking will be restarted please bne patient")
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', '../settings.json', true);
+			xhr.setRequestHeader('Content-Type', 'application/json');
+
+			xhr.send(JSON.stringify(settings));
+			delete settings.WIFICHANGED;
+			delete settings.MQTTCHANGED;
+		}
+	</script>
+	
+	
+</head>
+
+
+ 
+<body onLoad="onLoad()" style="background-color:#FFFFFF">
+	
+	<div class="topbar">
+		<a href="https://www.tmax-electronics.de"><img src="http://tmax-electronics.de/wp-content/uploads/2018/07/cropped-Logo-4-Alpha.png" alt="Logo" height="103" width="300"></img></a>
+		<span> Field Mill web-interface </span>
+	</div>
+
+	<div class="sidenav">
+	
+		<div class="dropdown">
+			<b>Setup</b>
+			<div class="dropdown-content">
+				<a href="calibrate.html">calibration</a>
+				<a href="settings.html">settings</a>
+			</div>
+		</div>
+		
+		<a href="readout.html" id="statusLink">Live readout</a>
+		<a href="about.html" id="aboutLink">About</a>
+	</div> 
+	 
+	<div class="main">
+		
+		<h3> Motor Settings </h3>
+		Target Motor speed: <input type="number" min="1000" max="5000" id="FM_targetRPM" name="FM_targetRPM" value="3600" onchange="settings.FM_targetRPM = document.getElementById('FM_targetRPM').value;">rpm<br>
+		Motor tuning coef. Integral: <input type="number" min="0" max="100" id="FM_motorTuneP" name="FM_motorTuneP" value="0.001" step="0.0001" onchange="settings.FM_motorTuneP = document.getElementById('FM_motorTuneP').value;"><br>
+		Motor tuning coef. Differential: <input type="number" min="-100" max="100" id="FM_motorTuneD" name="FM_motorTuneD" value="0.001" step="0.0001" onchange="settings.FM_motorTuneD = document.getElementById('FM_motorTuneD').value;"><br>
+
+		<h3> MQTT settings </h3>
+		<div style="padding: 0px 5px;"><input type="checkbox" id="MQTT_clientEnabled" name="MQTT_clientEnabled" onchange="hideUnHideMQTT()" checked="true">enable MQTT</input></div>
+		<div id="mqttSett" style="padding: 10px 20px;">
+			Broker URI: <input type="text" id="MQTT_brokerURI" name="MQTT_brokerURI" value="" onchange="settings.MQTT_brokerURI = document.getElementById('MQTT_brokerURI').value;settings.MQTTCHANGED='ye';"><br>
+			Username: <input type="text" id="MQTT_user" name="MQTTUser" value="" onchange="settings.MQTT_user = document.getElementById('MQTT_user').value;settings.MQTTCHANGED='ye';"><br>
+			Password: <input type="password" id="MQTT_password" name="MQTT_password" value="" onchange="settings.MQTT_password = document.getElementById('MQTT_password').value;settings.MQTTCHANGED='ye';"><br>
+			Topic: <input type="text" id="MQTT_topic" name="MQTT_topic" value="" onchange="settings.MQTT_topic = document.getElementById('MQTT_topic').value;settings.MQTTCHANGED='ye';"><br>
+			Reporting period: <input type="number" min="0" max="10000" id="MQTT_period" name="MQTT_period" value="" onchange="settings.MQTT_period = document.getElementById('MQTT_period').value;settings.MQTTCHANGED='ye';">ms<br>
+		</div>
+		
+		<h3> WiFi settings </h3>
+		<div style="padding: 0px 5px;"><input type="checkbox" id="WIFI_clientEnabled" name="WIFI_clientEnabled" onchange="hideUnHideWIFI()" checked="true">connect to network</input></div>
+		<div id="wifiSett" style="padding: 10px 20px;">
+			SSID: <input type="text" id="WIFI_ssid" name="WIFI_ssid" value="" onchange="settings.WIFI_ssid = document.getElementById('WIFI_ssid').value;settings.WIFICHANGED='ye';"><br>
+			Password: <input type="password" id="WIFI_password" name="WIFI_password" value="" onchange="settings.WIFI_password = document.getElementById('WIFI_password').value;settings.WIFICHANGED='ye';"><br>
+		</div>
+		
+		<button onclick="save()">Save</button>
+	</div>
+	
+	
+	<script>
+		
+		
+	</script>
+	
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>						
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>page</title>
+        
+	    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script type="text/javascript">
+            google.charts.load('current', {'packages':['gauge']});
+            google.charts.setOnLoadCallback(drawChart);
+
+            function drawChart() {
+
+                var data = google.visualization.arrayToDataTable([
+                ['Label', 'Value'],
+                ['Memory', 80],
+                ['CPU', 55],
+                ['Network', 68]
+                ]);
+
+                var options = {
+                    width: 800, height: 240,
+                    redFrom: 90, redTo: 100,
+                    yellowFrom:75, yellowTo: 90,
+                    minorTicks: 5
+                };
+
+                var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+
+                chart.draw(data, options);
+                
+                setInterval(function() {
+                    var xobj = new XMLHttpRequest();
+                    xobj.overrideMimeType("application/json");
+                    xobj.open('GET', 'measure.json', true); // Replace 'my_data' with the path to your file
+                    xobj.onreadystatechange = function () {
+                        if (xobj.readyState == 4 && xobj.status == "200") {
+                            var receivedData = JSON.parse(xobj.responseText);
+                            data.setValue(0, 1, receivedData.measuredField);
+                            data.setValue(1, 1, receivedData.motorRPM);
+                            chart.draw(data, options);
+                        }
+                    };
+                    xobj.send(null);  
+                }, 750);
+            }
+	    </script>
+	</head>
+ 
+	<body>
+        Hello World!
+		<div id="chart_div" style="width: 800px; height: 240px;"></div>
+	</body>
+</html>

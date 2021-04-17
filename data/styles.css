@@ -1,0 +1,196 @@
+
+
+	.topbar {
+		overflow: hidden;
+		background-color: #333;
+		padding-left: 20px;
+		border-radius:10px;
+	}
+
+	.topbar span {
+		padding: 45px 10px;
+		position:absolute;
+		color: #f2f2f2;
+		text-decoration: none;
+		font-size: 35px;
+		font-family: sans-serif;
+	}
+
+	.topbar img {
+		padding: 10px 10px;
+	}
+
+
+	.sidenav {
+		border-radius:10px;
+		position: fixed;
+		z-index: 1;
+		top: 150px;
+		left: 10px;
+		transition: .2s;
+		background: #eee;
+		overflow-x: show;
+		padding: 8px 16px 8px 8px;
+		padding-left: 20px;
+	}
+
+	.sidenav a {
+		padding: 8px 8px 6px 8px;
+		text-decoration: none;
+		font-size: 25px;
+		transition: .2s;
+		color: #000000;
+		display: block;
+		font-family: Arial;
+		border-radius:5px;
+	}
+
+	.sidenav a:hover {
+		transition: .3s;
+		background: #ff6600;
+	}
+
+
+
+	.main {
+		margin-left: 200px; /* Same width as the sidebar + left position in px */
+		font-size: 20px; /* Increased text to enable scrolling */
+		padding: 16px 10px;
+		font-family: sans-serif;
+	}
+
+	.main input {
+		position: relative;
+		bottom: 2px;
+		transition: .8s;
+		background-color: #ddd;
+		color: black;
+		padding: 6px 5px;
+		margin: 10px 10px;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		opacity: 0.7;
+	}
+
+	.main input:hover {
+		opacity: 1;
+		background-color: #ccc;
+	}
+
+	.main select {
+		position: relative;
+		bottom: 2px;
+		transition: .8s;
+		background-color: #ddd;
+		color: black;
+		padding: 6px 5px;
+		margin: 10px 10px;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		opacity: 0.7;
+	}
+
+	.main select:hover {
+		opacity: 1;
+		background-color: #ccc;
+	}
+	.main button {
+		position: relative;
+		bottom: 3px;
+		transition: .2s;
+		background-color: #333;
+		color: white;
+		padding: 7px 14px;
+		margin: 8px 0;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+
+	.main button:hover {
+		transition: .3s;
+		background: #ff6600;
+	}
+
+	.dropdown {
+		position: relative;
+		display: inline-flex;
+	}
+
+	.dropdown-content {
+		display: none;
+		position: absolute;
+		transition: .2s;
+		background-color: #f1f1f1;
+		min-width: 190px;
+		box-shadow: 0px 8px 64px 0px rgba(0,0,0,0.5);
+		z-index: 1;
+		left:80px;
+		font-family: Arial;
+		border-radius:5px;
+	}
+
+	.dropdown-content a {
+		padding: 8px 5px 6px 16px;
+		text-decoration: none;
+		font-size: 22px;
+		transition: .2s;
+		color: #000000;
+		transition: .2s;
+		display: block;
+		border-radius:5px;
+	}
+
+	.dropdown-content a:hover {
+		transition: .2s;
+		background:#ff6600;
+	}
+
+
+	.dropdown b {
+		padding: 6px 8px 6px 8px;
+		text-decoration: none;
+		font-size: 25px;
+		color: #000000;
+		display: inline-flex;
+		font-weight: normal;
+		font-family: Arial;
+		border-radius:5px;
+	}
+
+	.dropdown b:hover{ 
+		transition: .3s;
+		background:#ff6600;
+	}
+	
+	.slider {
+		position:relative;
+		appearance: none;
+		width: 400px;
+		height: 23px;
+		top:5px;
+		background: #333;
+		outline: none;
+		opacity: 0.7;
+		-webkit-transition: .2s;
+		transition: opacity .2s;
+	}
+
+	.slider:hover {
+		opacity: 1;
+	}
+
+	.slider::-webkit-slider-thumb {
+		appearance: none;
+		appearance: none;
+		width: 25px;
+		height: 30px;
+		background:#ff6600;
+		cursor: pointer;
+	}
+
+	.dropdown:hover .dropdown-content {display: inline-block;}
+
+	

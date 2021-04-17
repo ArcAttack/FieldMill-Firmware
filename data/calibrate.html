@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="styles.css" rel="stylesheet" type="text/css">
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+	<script src="https://code.highcharts.com/modules/export-data.js"></script>
+	<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+	<script type="text/javascript">
+		var calCurve;
+		function onLoad(){
+			calCurve = new Highcharts.chart('container', {
+
+				title: {
+					text: 'Field mill calibration curve'
+				},
+
+				yAxis: {
+					title: {
+						text: 'Applied field'
+					}
+				},
+
+				xAxis: {
+					title: {
+						text: 'Sensor Reading'
+					}
+				},
+
+				plotOptions: {
+					series: {
+						label: {
+							connectorAllowed: false
+						}
+					}
+				},
+
+				series: [{
+					name: 'Readout vs Applied field',
+				}]
+
+			});
+			
+			var xobj = new XMLHttpRequest();
+			xobj.overrideMimeType("application/json");
+			xobj.open('GET', '../cal.json', true);
+			xobj.onreadystatechange = function () {
+				if (xobj.readyState == 4 && xobj.status == "200") {
+					console.log("got existing cal!");
+					var receivedData = JSON.parse(xobj.responseText);
+					receivedData.Datapoints.forEach(function(entry) {
+						calCurve.series[0].addPoint([entry[0], entry[1]]);
+						console.log("added (" + entry[1] + ":" + entry[0] + ")");
+					});
+					listChangedHandler();
+				}
+			};
+			xobj.send(null);
+			
+			setInterval(function() {
+				var xobj = new XMLHttpRequest();
+				xobj.overrideMimeType("application/json");
+				xobj.open('GET', '../measure.json', true);
+				xobj.onreadystatechange = function () {
+					if (xobj.readyState == 4 && xobj.status == "200") {
+						var receivedData = JSON.parse(xobj.responseText);
+						readField.value = receivedData.sensorReading;
+					}
+				};
+				xobj.send(null);  
+			}, 1000);
+		}
+		
+		function removeOptions(selectElement) {
+		   var i, L = selectElement.options.length - 1;
+		   for(i = L; i >= 0; i--) {
+			  selectElement.remove(i);
+		   }
+		}
+		
+		function clearCal(){
+			if (confirm("Are you sure you want to delete existing calibration data?")) {
+				console.log("deleted");
+				calCurve.series[0].setData([]);
+				listChangedHandler();
+			} 
+		}
+		
+		function compareX(a, b) {
+			if (a[0] === b[0]) {
+				return 0;
+			}else {
+				return (a[0] > b[0]) ? -1 : 1;
+			}
+		}
+				
+		function addCalPoint(){
+			if (document.getElementById("calField").value != '') {
+				console.log("add");
+				calCurve.series[0].addPoint([document.getElementById("readField").value * 1, document.getElementById("calField").value * 1], true, false, true);
+				listChangedHandler();
+			} 
+		}
+		
+		function removeCalPoint(){
+			if (document.getElementById("elementToDelete").value != '') {
+				console.log("remove");
+				calCurve.series[0].points[document.getElementById("elementToDelete").selectedIndex].remove();
+				listChangedHandler();
+			} 
+		}
+		
+		function listChangedHandler(){
+			var list = document.getElementById('elementToDelete');
+			removeOptions(list);
+			calCurve.series[0].points.forEach(function(point) {
+				let newEntry = document.createElement("option");
+				newEntry.text = "RO = " + point.x + ": FIELD = " + point.y;
+				list.add(newEntry);
+			});
+			calCurve.series[0].points.sort(compareX);
+			calCurve.redraw();
+		}
+		
+		function save(){
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', '../cal.json', true);
+			xhr.setRequestHeader('Content-Type', 'application/json');
+			
+			var exp = {Datapoints:[]};
+			for(var i in calCurve.series[0].points){
+				console.log(calCurve.series[0].points[i]);
+				exp.Datapoints[i] = [calCurve.series[0].points[i].x, calCurve.series[0].points[i].y];
+			}
+
+			xhr.send(JSON.stringify(exp));
+			console.log(JSON.stringify(exp));
+		}
+		
+	</script>
+
+</head>
+
+<body onLoad="onLoad()" style="background-color:#FFFFFF">
+
+	<div class="topbar">
+		<a href="https://www.tmax-electronics.de"><img src="http://tmax-electronics.de/wp-content/uploads/2018/07/cropped-Logo-4-Alpha.png" alt="Logo" height="103" width="300"></img></a>
+		<span> Field Mill web-interface </span>
+	</div>
+
+	<div class="sidenav">
+
+		<div class="dropdown">
+			<b>Setup</b>
+			<div class="dropdown-content">
+				<a href="calibrate.html">calibration</a>
+				<a href="settings.html">settings</a>
+			</div>
+		</div>
+
+		<a href="readout.html" id="statusLink">Live readout</a>
+		<a href="about.html" id="aboutLink">About</a>
+	</div>
+
+	<div class="main">
+
+		<div id="container"></div>
+		<div id="curveButtons"><button onclick="clearCal()">Clear</button> <button onclick="save()">Save</button>
+		<div id="addPoints"> Current Readout: <input type="number" id="readField" disabled name="readout" value="0"> Applied field: <input type="number" id="calField" name="applied field" min="-15000" max="15000"> <button onclick="addCalPoint()">Add</button>
+		<div id="deletePoints"> <select id="elementToDelete"></select> <button onclick="removeCalPoint()">Delete</button></div>
+
+	</div>
+
+</body>
+</html>

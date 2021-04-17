@@ -1,0 +1,13 @@
+{
+	"MQTT_brokerURI":"",
+	"MQTT_user":"",
+	"MQTT_password":"",
+	"MQTT_topic":"",
+	"WIFI_ssid":"",
+	"WIFI_password":"",
+	"WIFI_clientEnabled":"false",
+	"MQTT_clientEnabled":"false",
+	"FM_targetRPM":"3600",
+	"FM_motorTuneP":"0.03",
+	"FM_motorTuneD":"0.2"
+}

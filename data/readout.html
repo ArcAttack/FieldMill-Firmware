@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>						
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="styles.css" rel="stylesheet" type="text/css">
+	
+	<script src="/webUI/gauge.js"></script>
+	
+	<script type="text/javascript">
+		var FieldGauge;
+		var SpeedGauge;
+		var lastField, lastSpeed;
+		var lastUpdateTime = Date.now();
+		
+		function onLoad(){
+			FieldGauge = new RadialGauge({
+				renderTo: 'FieldGaugeID',
+				width: 400,
+				height: 400,
+				units: 'Volts per meter',
+				minValue: -1500,
+				maxValue: 1500,
+				majorTicks: ['-1.5k', '-1k', '-0.5k', '0', '+0.5k', '+1k', '+1.5k'],
+				minorTicks: 10,
+				ticksAngle: 270,
+				startAngle: 45,
+				strokeTicks: false,
+				highlights  : [
+					{ from : -1500,  to : 0, color : 'rgba(0,   0, 255, 0.25)' },
+					{ from : 0, to : 1500, color : 'rgba(255, 0, 0, 0.25)' }
+				],
+				valueInt: 5,
+				valueDec: 0,
+				colorPlate: "#fff",
+				colorMajorTicks: "#0",
+				colorMinorTicks: "#ff7000",
+				colorTitle: "#000",
+				colorUnits: "#777777",
+				colorNumbers: "#686868",
+				valueBox: true,
+				colorValueText: "#000",
+				colorValueBoxRect: "#fff",
+				colorValueBoxRectEnd: "#fff",
+				colorValueBoxBackground: "#fff",
+				colorValueBoxShadow: false,
+				colorValueTextShadow: false,
+				colorNeedleShadowUp: true,
+				colorNeedleShadowDown: false,
+				colorNeedle: "rgba(70, 70, 70, .5)",
+				colorNeedleEnd: "rgba(255, 70, 0, .75)",
+				colorNeedleCircleOuter: "rgba(200, 200, 200, 1)",
+				colorNeedleCircleOuterEnd: "rgba(200, 200, 200, 1)",
+				borderShadowWidth: 00,
+				borders: false,
+				needleType: "arrow",
+				needleWidth: 2,
+				needleCircleSize: 5,
+				needleCircleOuter: true,
+				needleCircleInner: true,
+				animationDuration: 200,
+				animationRule: "dequint",
+				fontNumbers: "Courier New",
+				fontTitle: "Courier New",
+				fontUnits: "Courier New",
+				fontValue: "Courier New",
+				fontNumbersSize: 20,
+				fontNumbersWeight: 'bold',
+				fontTitleSize: 24,
+				fontUnitsSize: 22,
+				fontValueSize: 30,
+				animatedValue: true
+			});
+			
+			SpeedGauge = new LinearGauge({
+				renderTo: 'SpeedGaugeID',
+				width: 400,
+				height: 110,
+				units: "rpm",
+				title: "Motor Speed",
+				minValue: 3500,
+				maxValue: 3700,
+				majorTicks: ['3500', '3550', '3600', '3650', '3700'],
+				minorTicks: 2,
+				strokeTicks: true,
+				ticksWidth: 15,
+				ticksWidthMinor: 7.5,
+				highlights  : [
+					{ from : 3500,  to : 3525, color : 'rgba(255, 0, 0, 0.25)' },
+					{ from : 3525,  to : 3580, color : 'rgba(255, 255, 0, 0.35)' },
+					{ from : 3580,  to : 3620, color : 'rgba(0, 255, 0, 0.35)' },
+					{ from : 3620,  to : 3675, color : 'rgba(255, 255, 0, 0.35)' },
+					{ from : 3675, to : 3700, color : 'rgba(255, 0, 0, 0.25)' }
+				],
+				colorMajorTicks: "#ffe66a",
+				colorMinorTicks: "#ffe66a",
+				colorPlate: "#fff",
+				colorMajorTicks: "#0",
+				colorMinorTicks: "#ff7000",
+				colorTitle: "#000",
+				colorUnits: "#777777",
+				colorNumbers: "#686868",
+				borderShadowWidth: 0,
+				borders: false,
+				borderRadius: 10,
+				needleType: "line",
+				needleWidth: 5,
+				animationDuration: 400,
+				animationRule: "linear",
+				colorNeedle: "#222",
+				colorNeedleEnd: "",
+				barStroke: 0,
+				barWidth: 0,
+				barBeginCircle: false
+			});
+			
+			FieldGauge.draw();
+			FieldGauge.value = "0";
+			SpeedGauge.draw();
+			SpeedGauge.value = "3600";
+
+			armReload(0);
+		}
+
+		function loadData() {
+			var xobj = new XMLHttpRequest();
+			xobj.overrideMimeType("application/json");
+			xobj.open('GET', '../measure.json', true);
+			xobj.onreadystatechange = function () {
+				if (xobj.readyState == 4 && xobj.status == "200") {
+					var receivedData = JSON.parse(xobj.responseText);
+					FieldGauge.value = receivedData.measuredField;
+					SpeedGauge.value = receivedData.motorRPM;
+					let timeRequired = 500 - (Date.now() - lastUpdateTime);
+					armReload(timeRequired);
+					lastUpdateTime = Date.now();
+				}
+			};
+			xobj.send(null);  
+		}
+		
+		function armReload(time){
+			if(time < 200){ time = 200; }
+			setTimeout(loadData, time);
+		}
+
+		function updateRange(){
+			if(document.getElementById('range').value == 'smol'){
+				FieldGauge.update({
+					minValue: -1500,
+					maxValue: 1500,
+					majorTicks: ['-1.5k', '-1k', '-0.5k', '0', '+0.5k', '+1k', '+1.5k'],
+					highlights  : [
+						{ from : -1500,  to : 0, color : 'rgba(0,   0, 255, 0.25)' },
+						{ from : 0, to : 1500, color : 'rgba(255, 0, 0, 0.25)' }
+					],
+				});
+			}else{
+				FieldGauge.update({
+					minValue: -15000,
+					maxValue: 15000,
+					majorTicks: ['-15k', '-10k', '-5k', '0', '+5k', '+10k', '+15k'],
+					highlights  : [
+						{ from : -15000,  to : 0, color : 'rgba(0,   0, 255, 0.25)' },
+						{ from : 0, to : 15000, color : 'rgba(255, 0, 0, 0.25)' }
+					],
+				});
+			}
+		}
+	</script>
+	
+	
+</head>
+
+
+ 
+<body onLoad="onLoad()" style="background-color:#FFFFFF">
+	
+	<div class="topbar">
+		<a href="https://www.tmax-electronics.de"><img src="http://tmax-electronics.de/wp-content/uploads/2018/07/cropped-Logo-4-Alpha.png" alt="Logo" height="103" width="300"></img></a>
+		<span> Field Mill web-interface </span>
+	</div>
+
+	<div class="sidenav">
+	
+		<div class="dropdown">
+			<b>Setup</b>
+			<div class="dropdown-content">
+				<a href="calibrate.html">calibration</a>
+				<a href="settings.html">settings</a>
+			</div>
+		</div>
+		
+		<a href="readout.html" id="statusLink">Live readout</a>
+		<a href="about.html" id="aboutLink">About</a>
+	</div> 
+	 
+	<div class="main">
+		
+		<p><canvas id="FieldGaugeID"></canvas></p>
+		Range: 
+		<select name="range" id="range" onchange="updateRange()">
+		  <option value="smol">1.5kV/m</option>
+		  <option value="big">15kV/m</option>
+		</select>
+		
+		<p><canvas id="SpeedGaugeID"></canvas></p>
+	
+	</div>
+	
+	
+	<script>
+		
+		
+	</script>
+	
+</body>
+</html>
